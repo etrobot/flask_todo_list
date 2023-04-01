@@ -53,7 +53,7 @@ def empty_db():
     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
     create_db()
     yield app.test_client()
-    db.drop_all()
+    # db.drop_all()
 
 
 def test_authenticate():

@@ -6,8 +6,11 @@ from.index import index_views
 
 from App.controllers import (
     create_user,
+    get_all_users,
     jwt_authenticate,
-    login 
+    login,
+    get_all_users_json,
+    create_Conversation
 )
 
 auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
@@ -34,7 +37,8 @@ def login_action():
     user = login(data['username'], data['password'])
     if user:
         login_user(user)
-        return 'user logged in!'
+        create_Conversation(user['id'])
+        return 'user %s logged in!'%user['id']
     return 'bad username or password given', 401
 
 @auth_views.route('/logout', methods=['GET'])
