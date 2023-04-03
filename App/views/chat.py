@@ -16,16 +16,17 @@ from App.controllers import (
 chat_views = Blueprint('chat_views', __name__, )
 
 
-@chat_views.route('/api/converstaions', methods=['GET'])
-@login_required
-def get_converstaions():
-    converstaions = get_Conversation_by_userId(current_user.get_id())
-    return jsonify({'converstaions': converstaions})
+@chat_views.route('/api/conversations', methods=['GET'])
+@jwt_required()
+def get_conversations():
+    logging.getLogger(__name__).debug(current_user.get_id())
+    print(current_user.get_id())
+    conversations = get_Conversation_by_userId(current_user.get_id())
+    return jsonify({'conversations': conversations})
 
 
 @chat_views.route('/api/create_converstaion', methods=['GET'])
-@jwt_required
-@login_required
+@jwt_required()
 def create_converstaion():
     current_user_id = current_user.get_id()
     jwt_id = get_jwt_identity()
@@ -43,7 +44,7 @@ def get_tasks_by_conversationid():
 
 
 @chat_views.route('/api/create_task', methods=['GET'])
-@jwt_required
+@jwt_required()
 def create_task():
     current_user_id = current_user.get_id()
     jwt_id = get_jwt_identity()

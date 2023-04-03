@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user as jwt_current_user
 from flask_login import login_required, login_user, current_user, logout_user
-
-from.index import index_views
+import logging
 
 from App.controllers import (
     create_user,
@@ -68,7 +67,9 @@ def user_login_api():
   token = jwt_authenticate(data['username'], data['password'])
   if not token:
     return jsonify(message='bad username or password given'), 401
-  return jsonify(access_token=token)
+  logging.getLogger(__name__).debug(current_user.get_id())
+  print(current_user.get_id())
+  return token
 
 @auth_views.route('/api/identify', methods=['GET'])
 @jwt_required()
