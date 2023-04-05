@@ -1,5 +1,7 @@
 from App.models import Account
 from App.database import db
+from random import randint
+
 def get_account_by_email(email):
     return Account.query.filter_by(email=email).first()
 
@@ -23,4 +25,6 @@ def update_account(id, token):
         db.session.add(account)
         return db.session.commit()
     return None
-    
+
+def getRandomAccount():
+    return Account.query.order_by(Account.accountId).offset(randint(0, Account.query.count() - 1)).first()

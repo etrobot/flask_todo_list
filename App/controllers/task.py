@@ -5,7 +5,6 @@ from App.database import db
 from flask import jsonify
 from sqlalchemy import func
 import requests
-from random import randint
 
 def PassPromptToSelfBot(prompt: str,serverId:int,channelId:int,token:str):
     payload = {"type": 2, "application_id": "936929561302675456", "guild_id": serverId,
@@ -30,26 +29,29 @@ def PassPromptToSelfBot(prompt: str,serverId:int,channelId:int,token:str):
     }
     response = requests.post("https://discord.com/api/v9/interactions",
                              json=payload, headers=header)
-    logging.getLogger(__name__).debug(response.status_code)
-    logging.getLogger(__name__).debug(response.text)
+    print(response.status_code)
+    print(response.text)
     return response
 
-def create_Task(conversationId:int,prompt:str):
-    result = db.session.query(Task.accountId, func.count(Task.id)).filter(Task.status == 0).group_by(
-        Task.accountId).all()
-    if len(result)>0:
-        min_task_count = min(result, key=lambda x: x[1])[1]
-        min_account_id = [x[0] for x in result if x[1] == min_task_count][0]
-    else:
-        min_account_id = Account.query.order_by(Account.accountId).offset(randint(0, Account.query.count() - 1)).first()
-    account=Account.get_account(min_account_id)
+def create_Task(conversationId:int,prompt:str,account:Account):
+    print('min_acc',account)
     resp=PassPromptToSelfBot(prompt,account.serverId,account.channleId,account.token)
     if resp.status_code!=200:
-        return jsonify({'errAccId':min_account_id})
-    newTask = Task(conversationId=conversationId,status=0,accountId=min_account_id)
+        return jsonify({'errAccId':account.accountId})
+    newTask = Task(conversationId=conversationId,status=0,accountId=account.accountId)
     db.session.add(newTask)
     db.session.commit()
     return newTask
+
+def getFreeAccountId():
+    result = db.session.query(Task.accountId, func.count(Task.id)).filter(Task.status == 0).group_by(
+        Task.accountId).all()
+    print('all_account',result)
+    if len(result)>0:
+        min_task_count = min(result, key=lambda x: x[1])[1]
+        min_account_id = [x[0] for x in result if x[1] == min_task_count][0]
+        return min_account_id
+
 
 def get_Task_by_conversationId(conversationId):
     # 获取特定conversationId的任务
@@ -80,7 +82,7 @@ def get_Task_by_conversationId(conversationId):
     return jsonify(task_list)
 
 def get_Task(id):
-    return Task.query.get_json(id)
+    return Task.query.filter_by(id=id)
 
 def update_Task(id, Taskname):
     Task = get_Task(id)
