@@ -68,7 +68,6 @@ def user_login_api():
   if not token:
     return jsonify(message='bad username or password given'), 401
   logging.getLogger(__name__).debug(current_user.get_id())
-  print(current_user.get_id())
   return token
 
 @auth_views.route('/api/identify', methods=['GET'])

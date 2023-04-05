@@ -11,3 +11,9 @@ class Conversation(db.Model):
     title = db.Column(db.String(100))
     remark = db.Column(db.String(1000))
     updateTime = db.Column(db.DateTime)
+
+    def get_json(self):
+        return{
+            'conversationId': self.conversationId,
+            'title': self.title
+        }

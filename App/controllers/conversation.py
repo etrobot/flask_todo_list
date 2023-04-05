@@ -1,31 +1,19 @@
 from App.models import Conversation
 from App.database import db
+from datetime import *
 
 def create_Conversation(userId):
-    newConversation = Conversation(userId=userId)
+    newConversation = Conversation(userId=userId,title=datetime.now().strftime('%Y-%m-%d %H:%M'))
     db.session.add(newConversation)
     db.session.commit()
     return newConversation
 
 def get_Conversation_by_userId(userId):
-    return Conversation.query.filter_by(userId=userId).all()
-
-def get_Conversation(id):
-    return Conversation.query.get(id)
-
-def get_all_Conversations():
-    return Conversation.query.all()
-
-def get_all_Conversations_json():
-    Conversations = Conversation.query.all()
-    if not Conversations:
-        return []
-    Conversations = [Conversation.get_json() for Conversation in Conversations]
-    return Conversations
+    return [x.get_json() for x in Conversation.query.filter_by(userId=userId).all()]
 
 def update_Conversation(id, Conversationname):
-    Conversation = get_Conversation(id)
-    if Conversation:
+    conversation = Conversation.query.filter_by(conversationId=id).first()
+    if conversation:
         Conversation.Conversationname = Conversationname
         db.session.add(Conversation)
         return db.session.commit()

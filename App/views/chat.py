@@ -13,26 +13,23 @@ from App.controllers import (
     create_Task
 )
 
-chat_views = Blueprint('chat_views', __name__, )
+chat_views = Blueprint('chat_views', __name__, template_folder='../templates')
 
 
 @chat_views.route('/api/conversations', methods=['GET'])
 @jwt_required()
 def get_conversations():
-    logging.getLogger(__name__).debug(current_user.get_id())
-    print(current_user.get_id())
-    conversations = get_Conversation_by_userId(current_user.get_id())
-    return jsonify({'conversations': conversations})
+    jwt_id = get_jwt_identity()
+    conversations = get_Conversation_by_userId(jwt_id)
+    return jsonify([[x['conversationId'],x['title']] for x in conversations])
 
 
-@chat_views.route('/api/create_converstaion', methods=['GET'])
+@chat_views.route('/api/create_conversation', methods=['POST'])
 @jwt_required()
 def create_converstaion():
-    current_user_id = current_user.get_id()
     jwt_id = get_jwt_identity()
-    if current_user_id != jwt_id:
-        return jsonify({'msg': 'Invalid credentials'}), 401
-    return jsonify({'converstaionId': create_Conversation(current_user_id)})
+    newConv = create_Conversation(jwt_id)
+    return jsonify({'converstaionId': newConv.conversationId})
 
 
 @chat_views.route('/api/tasks', methods=['GET'])
