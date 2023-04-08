@@ -1,3 +1,4 @@
+import configparser
 import logging
 
 import discord
@@ -6,9 +7,8 @@ from discord.ext import commands
 from controllers import task
 
 proxy_url = 'http://127.0.0.1:7890'
-intents = discord.Intents.all()
-bot = commands.Bot(intents=intents, proxy=proxy_url)
-
+bot = commands.Bot(intents=discord.Intents.all(), proxy=proxy_url)
+conf = configparser.ConfigParser().read('config.ini')
 
 @bot.event
 async def on_ready():
@@ -50,4 +50,4 @@ async def on_message(message):
                 task.update_Task(t.id,message.id,url)
                 break
 
-bot.run('MTA5MDU3OTg0MTE1MTE0ODA3Mw.GezKQc.nShtw86wyx2RgXVZrW3_ajDkVu5Cjq5xSuqeCc')
+bot.run(conf.get['discord']['token'])
