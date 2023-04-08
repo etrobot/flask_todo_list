@@ -7,6 +7,7 @@ class Conversation(db.Model):
 
     conversationId = db.Column(db.Integer, primary_key=True)
     createTime = db.Column(db.DateTime)
+    accountId = db.Column(db.Integer)
     userId = db.Column(db.Integer)
     title = db.Column(db.String(100))
     remark = db.Column(db.String(1000))

@@ -1,5 +1,4 @@
-import logging
-
+from discord import MessageType
 from App.models import Task,Account
 from App.database import db
 from flask import jsonify
@@ -7,6 +6,7 @@ from sqlalchemy import func
 import requests
 
 def PassPromptToSelfBot(prompt: str,serverId:int,channelId:int,token:str):
+    print(prompt,serverId,channelId,token)
     payload = {"type": 2, "application_id": "936929561302675456", "guild_id": serverId,
                "channel_id": channelId, "session_id": "2fb980f65e5c9a77c96ca01f2c242cf6",
                "data": {"version": "1077969938624553050", "id": "938956540159881230", "name": "imagine", "type": 1,
@@ -29,16 +29,17 @@ def PassPromptToSelfBot(prompt: str,serverId:int,channelId:int,token:str):
     }
     response = requests.post("https://discord.com/api/v9/interactions",
                              json=payload, headers=header)
-    print(response.status_code)
-    print(response.text)
     return response
 
 def create_Task(conversationId:int,prompt:str,account:Account):
     print('min_acc',account)
     resp=PassPromptToSelfBot(prompt,account.serverId,account.channleId,account.token)
-    if resp.status_code!=200:
+    if resp.status_code!=204:
         return jsonify({'errAccId':account.accountId})
-    newTask = Task(conversationId=conversationId,status=0,accountId=account.accountId)
+    msgtype={
+        "default":MessageType.default,
+    }
+    newTask = Task(conversationId=conversationId,prompt=prompt,msgType=msgtype['default'])
     db.session.add(newTask)
     db.session.commit()
     return newTask
@@ -84,10 +85,13 @@ def get_Task_by_conversationId(conversationId):
 def get_Task(id):
     return Task.query.filter_by(id=id)
 
-def update_Task(id, Taskname):
+def get_Task_by_prompt(prompt:str):
+    return Task.query.filter_by(prompt=prompt).order_by(Task.updateTime.desc()).all()
+
+def update_Task(id, msgId,url):
     Task = get_Task(id)
     if Task:
-        Task.Taskname = Taskname
-        db.session.add(Task)
+        Task.msgId = msgId
+        Task.resultUrl=url
         return db.session.commit()
     return None
