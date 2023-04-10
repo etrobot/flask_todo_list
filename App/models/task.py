@@ -21,3 +21,18 @@ class Task(db.Model):
 
     conversation = db.relationship('Conversation', backref=db.backref('tasks', lazy=True))
     account = db.relationship('Account', backref=db.backref('tasks', lazy=True))
+
+    def get_json(self):
+        return{
+                "id":self.id,
+                "conversationId":self.conversationId,
+                "createTime":self.createTime,
+                "accountId":self.accountId,
+                "prompt":self.prompt,
+                "resultUrl":self.resultUrl,
+                "msgId":self.msgId,
+                "oriMsgId":self.oriMsgId,
+                "msgType":self.msgType,
+                "updateTime":self.updateTime,
+                "remark":self.remark,
+        }

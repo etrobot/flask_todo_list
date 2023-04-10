@@ -2,13 +2,17 @@ import configparser
 import logging
 
 import discord
-from discord import MessageType
 from discord.ext import commands
-from controllers import task
+
+from datetime import datetime
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Task
 
 proxy_url = 'http://127.0.0.1:7890'
 bot = commands.Bot(intents=discord.Intents.all(), proxy=proxy_url)
-conf = configparser.ConfigParser().read('config.ini')
+conf = configparser.ConfigParser()
+conf.read('config.ini')
 
 @bot.event
 async def on_ready():
@@ -45,9 +49,15 @@ async def on_message(message):
         url=attachment.url
         break
     if url:
-        for t in task.get_Task_by_prompt(message.content):
-            if t.msgType==message.type and t.resultUrl is None:
-                task.update_Task(t.id,message.id,url)
+        engine = create_engine('sqlite:///./instance/test.db')
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        for t in session.query(Task).filter_by(prompt=message.content).all():
+            if t.msgType==message.type.value and t.resultUrl is None:
+                t.prompt = 'new prompt'
+                t.updateTime = datetime.now()
+                session.commit()
+                session.close()
                 break
 
-bot.run(conf.get['discord']['token'])
+bot.run(conf['discord']['token'])

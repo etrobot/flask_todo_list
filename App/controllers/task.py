@@ -37,7 +37,7 @@ def create_Task(conversationId:int,prompt:str,account:Account):
     if resp.status_code!=204:
         return jsonify({'errAccId':account.accountId})
     msgtype={
-        "default":MessageType.default,
+        "default":MessageType.default.value,
     }
     newTask = Task(conversationId=conversationId,prompt=prompt,msgType=msgtype['default'])
     db.session.add(newTask)
@@ -45,7 +45,7 @@ def create_Task(conversationId:int,prompt:str,account:Account):
     return newTask
 
 def getFreeAccountId():
-    result = db.session.query(Task.accountId, func.count(Task.id)).filter(Task.status == 0).group_by(
+    result = db.session.query(Task.accountId, func.count(Task.id)).filter(Task.resultUrl == None).group_by(
         Task.accountId).all()
     print('all_account',result)
     if len(result)>0:
@@ -61,23 +61,7 @@ def get_Task_by_conversationId(conversationId):
     # 将结果转换为JSON格式
     task_list = []
     for task in tasks:
-        task_list.append({
-            'id': task.id,
-            'conversationId': task.conversationId,
-            'createTime': task.createTime,
-            'accountId': task.accountId,
-            'originalPrompt': task.originalPrompt,
-            'improvePrompt': task.improvePrompt,
-            'getResultTime': task.getResultTime,
-            'resultInfo': task.resultInfo,
-            'resultUrl01': task.resultUrl01,
-            'resultUrl02': task.resultUrl02,
-            'resultUrl03': task.resultUrl03,
-            'status': task.status,
-            'updateTime': task.updateTime,
-            'updateInfo': task.updateInfo,
-            'remark': task.remark
-        })
+        task_list.append(task.get_json())
 
     # 返回JSON格式的结果
     return jsonify(task_list)

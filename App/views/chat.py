@@ -61,7 +61,7 @@ def create_task():
         account=getRandomAccount()
     result=create_Task(conversationId=data['conversationId'],prompt=data['prompt'],account=account)
     logging.getLogger(__name__).debug('createTaskData:%s' % data)
-    return result
+    return jsonify({'msgId':result.msgId})
 
 
 @chat_views.route('/api/get_task', methods=['GET'])
